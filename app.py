@@ -161,7 +161,7 @@ def main():
             file_name="summarized.txt",
             mime="text/plain")
         
-        st.success('Successfully transcribe and summarized.')
+        st.success('Successfully transcribe and summarize.')
         
         os.remove(temp_video_file_path)
         audio, video = None, None
