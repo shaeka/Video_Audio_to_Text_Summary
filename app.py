@@ -75,7 +75,6 @@ def convert_audio_to_text(audio_path, video_path=None):
 
         try:
             converted_text = recognizer.recognize_google(audio)
-            st.info('Converted video/audio to text')
         except sr.UnknownValueError:
             st.warning("Speech Recognition could not understand audio")
         except sr.RequestError as e:
@@ -161,6 +160,8 @@ def main():
             key="download_summarized_text",
             file_name="summarized.txt",
             mime="text/plain")
+        
+        st.success('Successfully transcribe and summarized.')
         
         os.remove(temp_video_file_path)
         audio, video = None, None
