@@ -3,6 +3,10 @@ Create a streamlit app that takes in video/audio converts it into text using Goo
 
 The deployed app can be accessed [here](https://video-audio-to-text-summary.streamlit.app/)
 
+![image](https://github.com/shaeka/Video_Audio_to_Text_Summary/assets/56749928/c07d54eb-f3c6-4336-bdc8-c0db34dfaed5)
+
+![image](https://github.com/shaeka/Video_Audio_to_Text_Summary/assets/56749928/b6a956c9-0e73-4885-ad51-b54b71589eed)
+
 # How to get your Gemini Pro API key:
 Follow the instruction [here](https://ai.google.dev/pricing) to get your free API key
 
