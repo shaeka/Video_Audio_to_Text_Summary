@@ -1,4 +1,4 @@
-# Video/Audio to Text Summary
+# Video/Audio to Text Summarization
 Create a streamlit app that takes in video/audio converts it into text using Google Speech Recognition and provide summarized version of the text using Gemini Pro API.
 
 The deployed app can be accessed [here](https://video-audio-to-text-summary.streamlit.app/)
