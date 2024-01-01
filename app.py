@@ -40,17 +40,24 @@ def convert_video_to_audio(temp_video_file):
     # Extract the audio from the video
     audio = video.audio
 
-    return audio
+    return audio, video
 
-def convert_audio_to_text(audio_path):
+def convert_audio_to_text(audio_path, video_path=None):
     """
     Function extracts and returns text from given audio
     
     Input: Audio
     Output: Converted Text
     """
+    
+    # Export audio to a temporary WAV file
+    temp_audio_file = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+    temp_audio_file_path = temp_audio_file.name
+    audio_path.write_audiofile(temp_audio_file_path, codec='pcm_s16le')
+    temp_audio_file.close()
+    
     # Convert audio clip to a format compatible with speech recognition
-    audio_data = AudioSegment.from_file(audio_path.filename)
+    audio_data = AudioSegment.from_file(temp_audio_file_path)
     converted_text = ''
 
     # Export audio to a temporary WAV file
@@ -74,8 +81,11 @@ def convert_audio_to_text(audio_path):
         except sr.RequestError as e:
             print(f"Could not request results from Google Speech Recognition service; {e}")
 
-    # Remove the temporary WAV file
+    # Remove the temporary files
+    os.remove(temp_audio_file_path)
     os.remove(temp_wav_file_path)
+    if video_path is not None:
+        video_path.close()
     return converted_text
 
 def gemini_summarize_text(text, text_model):
@@ -109,27 +119,34 @@ def main():
     input_path = os.path.dirname(os.path.abspath(__file__)) + '/input/'
     output_path = os.path.dirname(os.path.abspath(__file__)) + '/output/'
     
-    input_data = st.file_uploader('Choose a video/audio file')
+    input_data = st.file_uploader('Choose a video/audio file', type=['mp4', 'mp3', 'wav'])
     
     video_file_extensions = [".mp4", ".mov", ".avi", ".wmv", ".flv", ".3gp"]
     audio_file_extensions = [".wav", ".mp3", ".ogg", ".flac", ".alac"]
     
     if input_data is not None:
-        input_data_ext = '.' + input_data.name.split(".")[-1]
-    
-        # Save the uploaded file temporarily
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.' + input_data.name.split(".")[-1]) as temp_video_file:
-            temp_video_file.write(input_data.read())    
+        input_data_ext = '.' + input_data.name.split(".")[-1] 
+        video = None
+        # Create a temporary file
+        temp_video_file = tempfile.NamedTemporaryFile(delete=False, suffix=input_data_ext)
+        temp_video_file_path = temp_video_file.name
+        # Write the contents of the uploaded file to the temporary file
+        with open(temp_video_file_path, 'wb') as temp_file:
+            temp_file.write(input_data.read())
+        temp_video_file.close()
     
         if input_data_ext in video_file_extensions:
             print('video file')
             ### Convert video to audio
-            audio = convert_video_to_audio(temp_video_file)
+            audio, video = convert_video_to_audio(temp_video_file)
         if input_data_ext in audio_file_extensions:
             print('audio file')
             audio = mpe.AudioFileClip(temp_video_file.name)
         
-        text = convert_audio_to_text(audio)
+        if video is not None:
+            text = convert_audio_to_text(audio, video)
+        else:
+            text = convert_audio_to_text(audio)
         # Add a download button for the transcribed text
         st.download_button(
             label="Download Transcribed Text",
@@ -137,7 +154,7 @@ def main():
             key="download_transcribed_text",
             file_name="transcribed.txt",
             mime="text/plain")
-        # save_text_to_file(output_path + 'original.txt', text)
+        
         response = gemini_summarize_text(text, text_model)
         # Add a download button for the summarized text
         st.download_button(
@@ -146,7 +163,9 @@ def main():
             key="download_summarized_text",
             file_name="summarized.txt",
             mime="text/plain")
-        # save_text_to_file(output_path + 'summarized.txt', response)
+        
+        os.remove(temp_video_file_path)
+        audio, video = None, None
 
 if __name__ == "__main__":
     main()
