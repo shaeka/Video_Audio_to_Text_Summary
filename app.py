@@ -75,11 +75,11 @@ def convert_audio_to_text(audio_path, video_path=None):
 
         try:
             converted_text = recognizer.recognize_google(audio)
-            print("Text from audio: ", converted_text)
+            st.info('Converted video/audio to text')
         except sr.UnknownValueError:
-            print("Speech Recognition could not understand audio")
+            st.warning("Speech Recognition could not understand audio")
         except sr.RequestError as e:
-            print(f"Could not request results from Google Speech Recognition service; {e}")
+            st.warning(f"Could not request results from Google Speech Recognition service; {e}")
 
     # Remove the temporary files
     os.remove(temp_audio_file_path)
@@ -136,11 +136,9 @@ def main():
         temp_video_file.close()
     
         if input_data_ext in video_file_extensions:
-            print('video file')
             ### Convert video to audio
             audio, video = convert_video_to_audio(temp_video_file)
         if input_data_ext in audio_file_extensions:
-            print('audio file')
             audio = mpe.AudioFileClip(temp_video_file.name)
         
         if video is not None:
